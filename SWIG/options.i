@@ -1251,6 +1251,10 @@ class FdBlackScholesVanillaEngine : public PricingEngine {
         Real illegalLocalVolOverwrite = -Null<Real>(),
         CashDividendModel cashDividendModel = Spot);
 
+    //! Local-vol grid points priced with illegalLocalVolOverwrite in the
+    //! last calculate() (0 without local vol).
+    Size illegalLocalVolCount() const;
+
     #if !defined(SWIGJAVA) && !defined(SWIGCSHARP)
     %feature("kwargs") make;
     %extend {

@@ -114,6 +114,21 @@ class JumpedYieldTermStructure : public YieldTermStructure {
                              const std::vector<DiscountFactor>& jumpFactors);
 };
 
+// the same curve on another Actual/N clock (vol-surface time for FD engines)
+
+%{
+#include <ql/termstructures/yield/rescaledtimetermstructure.hpp>
+using QuantLib::RescaledTimeYieldTermStructure;
+%}
+
+%shared_ptr(RescaledTimeYieldTermStructure);
+class RescaledTimeYieldTermStructure : public YieldTermStructure {
+  public:
+    RescaledTimeYieldTermStructure(const Handle<YieldTermStructure>& base,
+                                   const DayCounter& dayCounter);
+    Real factor() const;
+};
+
 // spreaded term structures
 
 %{
