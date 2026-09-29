@@ -1221,7 +1221,13 @@ class FdBlackScholesVanillaEngine : public PricingEngine {
         const FdmSchemeDesc& schemeDesc = FdmSchemeDesc::Douglas(),
         bool localVol = false,
         Real illegalLocalVolOverwrite = -Null<Real>(),
-        CashDividendModel cashDividendModel = Spot);
+        CashDividendModel cashDividendModel = Spot,
+        Real mesherScaleFactor = 1.5,
+        Real mesherEps = 0.0001,
+        doubleOrNull spotConcentrationDensity = Null<Real>(),
+        const std::vector<std::tuple<Real, Real, bool> >& concentrationPoints
+            = std::vector<std::tuple<Real, Real, bool> >(),
+        const std::vector<Time>& stoppingTimes = std::vector<Time>());
 
     FdBlackScholesVanillaEngine(
         const ext::shared_ptr<GeneralizedBlackScholesProcess>&,
@@ -1230,7 +1236,13 @@ class FdBlackScholesVanillaEngine : public PricingEngine {
         const FdmSchemeDesc& schemeDesc = FdmSchemeDesc::Douglas(),
         bool localVol = false,
         Real illegalLocalVolOverwrite = -Null<Real>(),
-        CashDividendModel cashDividendModel = Spot);
+        CashDividendModel cashDividendModel = Spot,
+        Real mesherScaleFactor = 1.5,
+        Real mesherEps = 0.0001,
+        doubleOrNull spotConcentrationDensity = Null<Real>(),
+        const std::vector<std::tuple<Real, Real, bool> >& concentrationPoints
+            = std::vector<std::tuple<Real, Real, bool> >(),
+        const std::vector<Time>& stoppingTimes = std::vector<Time>());
 
     FdBlackScholesVanillaEngine(
         const ext::shared_ptr<GeneralizedBlackScholesProcess>& process,
@@ -1239,7 +1251,13 @@ class FdBlackScholesVanillaEngine : public PricingEngine {
         const FdmSchemeDesc& schemeDesc = FdmSchemeDesc::Douglas(),
         bool localVol = false,
         Real illegalLocalVolOverwrite = -Null<Real>(),
-        CashDividendModel cashDividendModel = Spot);
+        CashDividendModel cashDividendModel = Spot,
+        Real mesherScaleFactor = 1.5,
+        Real mesherEps = 0.0001,
+        doubleOrNull spotConcentrationDensity = Null<Real>(),
+        const std::vector<std::tuple<Real, Real, bool> >& concentrationPoints
+            = std::vector<std::tuple<Real, Real, bool> >(),
+        const std::vector<Time>& stoppingTimes = std::vector<Time>());
 
     FdBlackScholesVanillaEngine(
         const ext::shared_ptr<GeneralizedBlackScholesProcess>&,
@@ -1249,7 +1267,13 @@ class FdBlackScholesVanillaEngine : public PricingEngine {
         const FdmSchemeDesc& schemeDesc = FdmSchemeDesc::Douglas(),
         bool localVol = false,
         Real illegalLocalVolOverwrite = -Null<Real>(),
-        CashDividendModel cashDividendModel = Spot);
+        CashDividendModel cashDividendModel = Spot,
+        Real mesherScaleFactor = 1.5,
+        Real mesherEps = 0.0001,
+        doubleOrNull spotConcentrationDensity = Null<Real>(),
+        const std::vector<std::tuple<Real, Real, bool> >& concentrationPoints
+            = std::vector<std::tuple<Real, Real, bool> >(),
+        const std::vector<Time>& stoppingTimes = std::vector<Time>());
 
     //! Local-vol grid points priced with illegalLocalVolOverwrite in the
     //! last calculate() (0 without local vol).
@@ -1266,19 +1290,29 @@ class FdBlackScholesVanillaEngine : public PricingEngine {
                     const FdmSchemeDesc& schemeDesc = FdmSchemeDesc::Douglas(),
                     bool localVol = false,
                     Real illegalLocalVolOverwrite = -Null<Real>(),
-                    CashDividendModel cashDividendModel = Spot) {
+                    CashDividendModel cashDividendModel = Spot,
+                    Real mesherScaleFactor = 1.5,
+                    Real mesherEps = 0.0001,
+                    doubleOrNull spotConcentrationDensity = Null<Real>(),
+                    const std::vector<std::tuple<Real, Real, bool> >& concentrationPoints
+                        = std::vector<std::tuple<Real, Real, bool> >(),
+                    const std::vector<Time>& stoppingTimes = std::vector<Time>()) {
             if (dividends.empty()) {
                 return ext::make_shared<FdBlackScholesVanillaEngine>(
                                                 process, quantoHelper, tGrid, xGrid,
                                                 dampingSteps, schemeDesc,
                                                 localVol, illegalLocalVolOverwrite,
-                                                cashDividendModel);
+                                                cashDividendModel, mesherScaleFactor,
+                                                mesherEps, spotConcentrationDensity,
+                                                concentrationPoints, stoppingTimes);
             } else {
                 return ext::make_shared<FdBlackScholesVanillaEngine>(
                                                 process, dividends, quantoHelper, tGrid, xGrid,
                                                 dampingSteps, schemeDesc,
                                                 localVol, illegalLocalVolOverwrite,
-                                                cashDividendModel);
+                                                cashDividendModel, mesherScaleFactor,
+                                                mesherEps, spotConcentrationDensity,
+                                                concentrationPoints, stoppingTimes);
             }
         }
     }

@@ -91,6 +91,19 @@ class FdmBlackScholesMesher : public Fdm1dMesher {
             = ext::shared_ptr<FdmQuantoHelper>(),
         Real spotAdjustment = 0.0);
 
+    static std::pair<Real, Real> xRange(
+        const ext::shared_ptr<GeneralizedBlackScholesProcess>& process,
+        Time maturity, Real strike,
+        doubleOrNull xMinConstraint = Null<Real>(),
+        doubleOrNull xMaxConstraint = Null<Real>(),
+        Real eps = 0.0001,
+        Real scaleFactor = 1.5,
+        const std::vector<ext::shared_ptr<Dividend> >& dividendSchedule
+            = std::vector<ext::shared_ptr<Dividend> >(),
+        const ext::shared_ptr<FdmQuantoHelper>& fdmQuantoHelper
+            = ext::shared_ptr<FdmQuantoHelper>(),
+        Real spotAdjustment = 0.0);
+
     static ext::shared_ptr<GeneralizedBlackScholesProcess> processHelper(
          const Handle<Quote>& s0,
          const Handle<YieldTermStructure>& rTS,
