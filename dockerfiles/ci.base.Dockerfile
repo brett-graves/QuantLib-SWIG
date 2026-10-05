@@ -1,14 +1,15 @@
 ARG tag=rolling
 FROM ghcr.io/lballabio/quantlib-devenv:${tag}
-MAINTAINER Luigi Ballabio <luigi.ballabio@gmail.com>
-LABEL Description="A development environment for building QuantLib-SWIG on Travis CI"
+
+LABEL org.opencontainers.image.authors="Luigi Ballabio <luigi.ballabio@gmail.com>"
+LABEL description="An environment for QuantLib-SWIG CI builds on Linux"
 
 RUN apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y libpcre2-dev \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-ENV swig_version=4.4.1
+ENV swig_version=4.5.1
 
 RUN wget http://downloads.sourceforge.net/project/swig/swig/swig-${swig_version}/swig-${swig_version}.tar.gz \
  && tar xfz swig-${swig_version}.tar.gz \

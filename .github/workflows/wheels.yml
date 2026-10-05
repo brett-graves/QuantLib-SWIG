@@ -12,8 +12,11 @@ on:
   workflow_dispatch:
     # manual runs to try out changes in the workflow
     inputs:
-      ref:
-        description: 'Tag or branch to use'
+      qlref:
+        description: 'QuantLib tag or branch to use'
+        required: true
+      qlswigref:
+        description: 'QuantLib-SWIG tag or branch to use'
         required: true
 
 jobs:
@@ -24,13 +27,15 @@ jobs:
     - name: Determine tag or branch to build
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "REF=${{ github.event.inputs.ref }}" | tee -a $GITHUB_ENV
+            echo "QLREF=${{ github.event.inputs.qlref }}" | tee -a $GITHUB_ENV
+            echo "QLSWIGREF=${{ github.event.inputs.qlswigref }}" | tee -a $GITHUB_ENV
         else
-            echo "REF=${{ github.ref_name }}" | tee -a $GITHUB_ENV
+            echo "QLREF=${{ github.ref_name }}" | tee -a $GITHUB_ENV
+            echo "QLSWIGREF=${{ github.ref_name }}" | tee -a $GITHUB_ENV
         fi
     - name: Setup
       env:
-        SWIG_VERSION: 4.4.1
+        SWIG_VERSION: 4.5.1
       run: |
         sudo apt update
         sudo apt install -y libpcre2-dev libboost-dev tofrodos
@@ -41,10 +46,10 @@ jobs:
             && ./configure --prefix=/usr CXXFLAGS=-O3 \
             && make -j 4 && sudo make install \
             && cd .. && rm -rf swig-${SWIG_VERSION}
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         repository: lballabio/QuantLib
-        ref: ${{ env.REF }}
+        ref: ${{ env.QLREF }}
         path: quantlib
         fetch-depth: 0
         fetch-tags: true
@@ -57,10 +62,10 @@ jobs:
         mkdir ../tarballs
         mv QuantLib-*.tar.gz ../tarballs
         cd ../tarballs && ../quantlib/tools/tgz2zip QuantLib-*.tar.gz && ls -lh
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         repository: lballabio/QuantLib-SWIG
-        ref: ${{ env.REF }}
+        ref: ${{ env.QLSWIGREF }}
         path: quantlib-swig
         fetch-depth: 0
         fetch-tags: true
@@ -72,7 +77,7 @@ jobs:
         make dist
         mv QuantLib-SWIG-*.tar.gz ../tarballs
         cd ../tarballs && ../quantlib-swig/tools/tgz2zip QuantLib-SWIG-*.tar.gz && ls -lh
-    - uses: actions/upload-artifact@v6
+    - uses: actions/upload-artifact@v7
       with:
         name: tarballs
         path: ./tarballs/*
@@ -83,8 +88,8 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
-    - uses: actions/checkout@v6
-    - uses: actions/download-artifact@v7
+    - uses: actions/checkout@v7
+    - uses: actions/download-artifact@v8
       with:
         name: tarballs
         path: .
@@ -96,15 +101,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-15-intel, macos-14]
+        os: [macos-15-intel, macos-15]
     runs-on: ${{ matrix.os }}
     needs: detect-version
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Setup
       run: |
         brew install boost
-    - uses: actions/download-artifact@v7
+    - uses: actions/download-artifact@v8
       with:
         name: tarballs
         path: .
@@ -119,7 +124,7 @@ jobs:
       run: |
         tar xfz QuantLib-SWIG-${{ needs.detect-version.outputs.version }}.tar.gz
     - name: Build QuantLib wheels
-      uses: pypa/cibuildwheel@v3.3
+      uses: pypa/cibuildwheel@v4.2
       env:
         CIBW_SKIP: cp3??t-*
         CIBW_ENABLE: pypy
@@ -131,7 +136,7 @@ jobs:
       with:
         package-dir: ./QuantLib-SWIG-${{ needs.detect-version.outputs.version }}/Python
     - name: Save wheels as artifacts
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: wheels-${{ matrix.os }}
         path: ./wheelhouse/*.whl
@@ -140,15 +145,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-15-intel, macos-14]
+        os: [macos-15-intel, macos-15]
     runs-on: ${{ matrix.os }}
     needs: detect-version
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Setup
       run: |
         brew install boost
-    - uses: actions/download-artifact@v7
+    - uses: actions/download-artifact@v8
       with:
         name: tarballs
         path: .
@@ -156,14 +161,14 @@ jobs:
       run: |
         tar xfz QuantLib-${{ needs.detect-version.outputs.version }}.tar.gz
         cd QuantLib-${{ needs.detect-version.outputs.version }}/
-        ./configure --disable-shared --with-boost-include=`brew --prefix`/include --enable-unity-build --enable-thread-safe-observer-pattern --disable-test-suite --enable-skip-examples
+        ./configure --disable-shared --with-boost-include=`brew --prefix`/include --enable-unity-build --enable-thread-safe-observer-pattern --enable-sessions --disable-test-suite --enable-skip-examples
         make -j3 CXXFLAGS="-std=c++17 -g0 -O3 -fno-common -dynamic -DNDEBUG -fwrapv" LDFLAGS="-fno-common -dynamic -DNDEBUG -fwrapv"
         sudo make install
     - name: Unpack QuantLib-SWIG
       run: |
         tar xfz QuantLib-SWIG-${{ needs.detect-version.outputs.version }}.tar.gz
     - name: Build QuantLib wheels
-      uses: pypa/cibuildwheel@v3.3
+      uses: pypa/cibuildwheel@v4.2
       env:
         CIBW_BUILD: cp3??t-*
         CXXFLAGS: -std=c++17 -g0 -O3
@@ -174,7 +179,7 @@ jobs:
       with:
         package-dir: ./QuantLib-SWIG-${{ needs.detect-version.outputs.version }}/Python
     - name: Save wheels as artifacts
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: wheels-nogil-${{ matrix.os }}
         path: ./wheelhouse/*.whl
@@ -191,16 +196,16 @@ jobs:
           - arch: x86
             platform: Win32
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v2
+      uses: microsoft/setup-msbuild@v3
     - name: Setup Boost
       run: |
         $Url = "https://archives.boost.io/release/1.90.0/source/boost_1_90_0.zip"
         (New-Object System.Net.WebClient).DownloadFile($Url, "$RUNNER_TEMP\boost.zip")
         Expand-Archive -Path "$RUNNER_TEMP\boost.zip" -DestinationPath C:\local
         Rename-Item -Path "C:\local\boost_1_90_0" -NewName "boost"
-    - uses: actions/download-artifact@v7
+    - uses: actions/download-artifact@v8
       with:
         name: tarballs
         path: .
@@ -216,7 +221,7 @@ jobs:
       run: |
         Expand-Archive -Path QuantLib-SWIG-${{ needs.detect-version.outputs.version }}.zip -DestinationPath .
     - name: Build QuantLib wheels
-      uses: pypa/cibuildwheel@v3.3
+      uses: pypa/cibuildwheel@v4.2
       env:
         QL_DIR: C:\local\QuantLib-${{ needs.detect-version.outputs.version }}
         INCLUDE: C:\local\boost
@@ -230,7 +235,7 @@ jobs:
       with:
         package-dir: ./QuantLib-SWIG-${{ needs.detect-version.outputs.version }}/Python
     - name: Save wheels as artifacts
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: wheels-windows-${{ matrix.arch }}
         path: ./wheelhouse/*.whl
@@ -247,16 +252,16 @@ jobs:
           - arch: x86
             platform: Win32
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v2
+      uses: microsoft/setup-msbuild@v3
     - name: Setup Boost
       run: |
         $Url = "https://archives.boost.io/release/1.90.0/source/boost_1_90_0.zip"
         (New-Object System.Net.WebClient).DownloadFile($Url, "$RUNNER_TEMP\boost.zip")
         Expand-Archive -Path "$RUNNER_TEMP\boost.zip" -DestinationPath C:\local
         Rename-Item -Path "C:\local\boost_1_90_0" -NewName "boost"
-    - uses: actions/download-artifact@v7
+    - uses: actions/download-artifact@v8
       with:
         name: tarballs
         path: .
@@ -273,7 +278,7 @@ jobs:
       run: |
         Expand-Archive -Path QuantLib-SWIG-${{ needs.detect-version.outputs.version }}.zip -DestinationPath .
     - name: Build QuantLib wheels
-      uses: pypa/cibuildwheel@v3.3
+      uses: pypa/cibuildwheel@v4.2
       env:
         QL_DIR: C:\local\QuantLib-${{ needs.detect-version.outputs.version }}
         INCLUDE: C:\local\boost
@@ -286,7 +291,7 @@ jobs:
       with:
         package-dir: ./QuantLib-SWIG-${{ needs.detect-version.outputs.version }}/Python
     - name: Save wheels as artifacts
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: wheels-nogil-windows-${{ matrix.arch }}
         path: ./wheelhouse/*.whl
@@ -317,8 +322,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     needs: detect-version
     steps:
-    - uses: actions/checkout@v6
-    - uses: actions/download-artifact@v7
+    - uses: actions/checkout@v7
+    - uses: actions/download-artifact@v8
       with:
         name: tarballs
         path: .
@@ -327,11 +332,11 @@ jobs:
         tar xfz QuantLib-${{ needs.detect-version.outputs.version }}.tar.gz
         tar xfz QuantLib-SWIG-${{ needs.detect-version.outputs.version }}.tar.gz
     - name: Build QuantLib wheels
-      uses: pypa/cibuildwheel@v3.3
+      uses: pypa/cibuildwheel@v4.2
       env:
         CIBW_BUILD: "*-${{ matrix.image }}*"
         CIBW_SKIP: cp3??t-*
-        CIBW_ENABLE: pypy
+        CIBW_ENABLE: ${{ ( matrix.arch != 'i686' || matrix.image != 'manylinux' ) && 'pypy' || '' }}
         CIBW_ARCHS_LINUX: ${{ matrix.arch }}
         CIBW_BUILD_VERBOSITY: 2
         CIBW_BEFORE_ALL_LINUX: .ci/wheels/before_all_linux.sh
@@ -342,7 +347,7 @@ jobs:
       with:
         package-dir: ./QuantLib-SWIG-${{ needs.detect-version.outputs.version }}/Python
     - name: Save wheels as artifacts
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: wheels-linux-${{ matrix.image }}-${{ matrix.arch }}
         path: ./wheelhouse/*.whl
@@ -359,9 +364,6 @@ jobs:
             image: musllinux
             os: ubuntu-24.04
           - arch: i686
-            image: manylinux
-            os: ubuntu-24.04
-          - arch: i686
             image: musllinux
             os: ubuntu-24.04
           - arch: aarch64
@@ -373,8 +375,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     needs: detect-version
     steps:
-    - uses: actions/checkout@v6
-    - uses: actions/download-artifact@v7
+    - uses: actions/checkout@v7
+    - uses: actions/download-artifact@v8
       with:
         name: tarballs
         path: .
@@ -383,7 +385,7 @@ jobs:
         tar xfz QuantLib-${{ needs.detect-version.outputs.version }}.tar.gz
         tar xfz QuantLib-SWIG-${{ needs.detect-version.outputs.version }}.tar.gz
     - name: Build QuantLib wheels
-      uses: pypa/cibuildwheel@v3.3
+      uses: pypa/cibuildwheel@v4.2
       env:
         CIBW_BUILD: "cp3??t-${{ matrix.image }}*"
         CIBW_ARCHS_LINUX: ${{ matrix.arch }}
@@ -396,7 +398,7 @@ jobs:
       with:
         package-dir: ./QuantLib-SWIG-${{ needs.detect-version.outputs.version }}/Python
     - name: Save wheels as artifacts
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: wheels-nogil-linux-${{ matrix.image }}-${{ matrix.arch }}
         path: ./wheelhouse/*.whl
@@ -408,7 +410,7 @@ jobs:
     permissions:
       id-token: write
     steps:
-    - uses: actions/download-artifact@v7
+    - uses: actions/download-artifact@v8
     - name: Collect wheels
       run: |
         mkdir ./wheelhouse
@@ -428,7 +430,7 @@ jobs:
     permissions:
       id-token: write
     steps:
-    - uses: actions/download-artifact@v7
+    - uses: actions/download-artifact@v8
     - name: Collect wheels
       run: |
         mkdir ./wheelhouse
