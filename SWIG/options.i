@@ -1319,6 +1319,51 @@ class FdBlackScholesVanillaEngine : public PricingEngine {
     #endif
 };
 
+%{
+using QuantLib::FdBlackScholesStripEngine;
+%}
+
+%shared_ptr(FdBlackScholesStripEngine)
+class FdBlackScholesStripEngine : public PricingEngine {
+  public:
+    #if defined(SWIGPYTHON)
+    %feature("kwargs") FdBlackScholesStripEngine;
+    #endif
+    FdBlackScholesStripEngine(
+        const ext::shared_ptr<GeneralizedBlackScholesProcess>& process,
+        DividendSchedule dividends = DividendSchedule(),
+        Size xGrid = 300, Size tGrid = 100,
+        Real minStepsPerYear = 100.0,
+        Real mesherScaleFactor = 2.0,
+        Real mesherEps = 0.0001,
+        Real spotConcentrationDensity = 0.1,
+        Real illegalLocalVolOverwrite = -Null<Real>(),
+        const std::vector<Time>& stoppingTimes = std::vector<Time>());
+
+    //! strip solves run so far
+    Size solveCount() const;
+    //! local-vol points overwritten in the last strip solve
+    Size illegalLocalVolCount() const;
+
+    %extend {
+        //! registers options (types as Option.Call / Option.Put) to be
+        //! solved together with their expiry
+        void declare(const Date& maturity,
+                     const std::vector<int>& types,
+                     const std::vector<Real>& strikes,
+                     Exercise::Type exerciseType = Exercise::American) {
+            std::vector<Option::Type> t;
+            t.reserve(types.size());
+            for (int x : types) {
+                QL_REQUIRE(x == Option::Call || x == Option::Put,
+                           "option type " << x << " is neither Call nor Put");
+                t.push_back(Option::Type(x));
+            }
+            self->declare(maturity, t, strikes, exerciseType);
+        }
+    }
+};
+
 %shared_ptr(FdBlackScholesShoutEngine)
 class FdBlackScholesShoutEngine : public PricingEngine {
   public:

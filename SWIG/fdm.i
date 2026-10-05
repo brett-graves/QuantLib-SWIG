@@ -130,6 +130,50 @@ class Concentrating1dMesher : public Fdm1dMesher {
         Real tol = 1e-8);
 };
 
+%{
+using QuantLib::FdmBlackScholesStripSolver;
+using QuantLib::FdmBlackScholesStripResults;
+%}
+
+#if defined(SWIGPYTHON)
+%template(StrikedTypePayoffVector) std::vector<ext::shared_ptr<StrikedTypePayoff> >;
+#endif
+
+struct FdmBlackScholesStripResults {
+    std::vector<Real> value, delta, gamma, theta;
+    Size illegalLocalVolCount;
+};
+
+class FdmBlackScholesStripSolver {
+  public:
+    #if defined(SWIGPYTHON)
+    %feature("kwargs") FdmBlackScholesStripSolver;
+    #endif
+    FdmBlackScholesStripSolver(
+        const ext::shared_ptr<GeneralizedBlackScholesProcess>& process,
+        const Date& maturityDate,
+        const std::vector<ext::shared_ptr<StrikedTypePayoff> >& payoffs,
+        bool american,
+        const DividendSchedule& dividends,
+        const ext::shared_ptr<Fdm1dMesher>& mesher,
+        Size tGrid,
+        Real illegalLocalVolOverwrite = -Null<Real>(),
+        const std::vector<Time>& stoppingTimes = std::vector<Time>(),
+        bool exactCellAverage = false);
+
+    FdmBlackScholesStripResults solve() const;
+
+    static ext::shared_ptr<Fdm1dMesher> stripMesher(
+        const ext::shared_ptr<GeneralizedBlackScholesProcess>& process,
+        Time maturity,
+        const std::vector<Real>& strikes,
+        const DividendSchedule& dividends,
+        Size xGrid,
+        Real scaleFactor = 2.0,
+        Real eps = 0.0001,
+        Real spotDensity = 0.1);
+};
+
 %shared_ptr(ExponentialJump1dMesher)
 class ExponentialJump1dMesher : public Fdm1dMesher {
    public:
