@@ -485,7 +485,8 @@ class MyNewVolSurface : public BlackVolTermStructure {
 // Size vector for batch eSSVI evaluation
 %template(SizeVector) std::vector<Size>;
 
-// Numpy output typemap for batch eSSVI methods.
+// Numpy output typemap for batch eSSVI methods and localVolGrid (all
+// local-vol surfaces).
 // Converts std::vector<Real> return values directly to numpy arrays
 // via memcpy instead of per-element Python iteration.
 %{
@@ -499,7 +500,8 @@ class MyNewVolSurface : public BlackVolTermStructure {
               std::vector<Real> batchBlackVolAtTimes,
               std::vector<Real> batchImpliedVolGlobalGradient,
               std::vector<Real> batchImpliedVolGlobalGradientAtTimes,
-              std::vector<Real> chainJacobian {
+              std::vector<Real> chainJacobian,
+              std::vector<Volatility> localVolGrid {
     npy_intp dims[1] = { static_cast<npy_intp>($1.size()) };
     $result = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
     if ($result && $1.size() > 0) {
