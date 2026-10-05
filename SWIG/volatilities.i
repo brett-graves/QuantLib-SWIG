@@ -1083,6 +1083,50 @@ class PwlPdfBlackVolSurface : public BlackVolTermStructure {
             = std::vector<Real>());
 };
 
+// B-spline total-variance surface: per-expiry clamped B-splines of w(k) in
+// log-forward moneyness, straight total-variance wings, total variance linear
+// in time at fixed k (chloride Meniscus calibrator output).
+
+%{
+#include <ql/termstructures/volatility/equityfx/bsplinevariancesurface.hpp>
+using QuantLib::BSplineVarianceSurface;
+%}
+
+%shared_ptr(BSplineVarianceSurface);
+class BSplineVarianceSurface : public BlackVolTermStructure {
+  public:
+    BSplineVarianceSurface(
+        const Date& referenceDate,
+        const std::vector<Date>& dates,
+        const std::vector<std::vector<Real>>& knots,
+        const std::vector<std::vector<Real>>& coefficients,
+        Natural degree,
+        const Handle<Quote>& spot,
+        const Handle<YieldTermStructure>& riskFreeRate,
+        const Handle<YieldTermStructure>& dividendYield,
+        const DayCounter& dc = Actual365Fixed());
+
+    BSplineVarianceSurface(
+        const Date& referenceDate,
+        const std::vector<Date>& dates,
+        const std::vector<std::vector<Real>>& knots,
+        const std::vector<std::vector<Real>>& coefficients,
+        Natural degree,
+        const Handle<Quote>& spot,
+        const Handle<YieldTermStructure>& riskFreeRate,
+        const Handle<YieldTermStructure>& dividendYield,
+        DividendSchedule dividends,
+        const DayCounter& dc = Actual365Fixed());
+
+    Real forward(Time t) const;
+    const std::vector<Time>& times() const;
+    Natural degree() const;
+    Real sliceTotalVariance(Size i, Real k) const;
+    std::vector<Real> sliceTotalVarianceDerivatives(Size i, Real k) const;
+    Real totalVariance(Real k, Time t) const;
+    Real localVariance(Real k, Time t) const;
+};
+
 // PWL PDF vol surface (takes raw PDF params, computes black vol analytically)
 
 %{
