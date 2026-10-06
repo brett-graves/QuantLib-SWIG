@@ -979,6 +979,13 @@ class ParametricVolTermStructure : public BlackVolTermStructure {
     Real totalVarianceStrikeSecondDerivative(Real k, Time t) const;
     Real totalVarianceTimeDerivative(Real k, Time t) const;
     Real forward(Time t) const;
+    Real dividendPV(Time t) const;
+
+    // Pure-dividend coordinates (Buehler 2010, puredividend.hpp): slices in
+    // x = ln((K - D)/(F - D)); strike-taking methods still return Black vols.
+    void setPureDividendCoordinates(bool pure);
+    bool pureDividendCoordinates() const;
+    Real coordinate(Time t, Real strike) const;
 
     // Analytic Dupire local vol — closed form on (S3, JW), one FD pair
     // on Python-supplied shapes that don't override d2fdz2.
@@ -1042,6 +1049,30 @@ class ParametricLocalVolSurface : public LocalVolTermStructure {
     std::vector<Volatility> localVolGrid(
         const std::vector<Time>& times,
         const std::vector<Real>& underlyingLevels) const;
+};
+
+
+// Pure-dividend (Buehler) helpers and the flat-vol member of the family.
+
+%{
+#include <ql/termstructures/volatility/equityfx/puredividend.hpp>
+using QuantLib::PureDividendFlatLocalVol;
+using QuantLib::pureDividendBlackVol;
+%}
+
+Volatility pureDividendBlackVol(Time t, Real strike, Real forward,
+                                Real dividendPV, Real wX);
+
+%shared_ptr(PureDividendFlatLocalVol);
+class PureDividendFlatLocalVol : public LocalVolTermStructure {
+  public:
+    PureDividendFlatLocalVol(const Date& referenceDate,
+                             const Handle<YieldTermStructure>& riskFreeRate,
+                             const Handle<YieldTermStructure>& dividendYield,
+                             const DividendSchedule& dividends,
+                             const Handle<Quote>& sigmaX,
+                             const DayCounter& dayCounter = Actual365Fixed());
+    Real dividendPV(Time t) const;
 };
 
 
