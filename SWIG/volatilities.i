@@ -1121,6 +1121,7 @@ class PwlPdfBlackVolSurface : public BlackVolTermStructure {
 %{
 #include <ql/termstructures/volatility/equityfx/bsplinevariancesurface.hpp>
 using QuantLib::BSplineVarianceSurface;
+using QuantLib::BSplineLocalVolSurface;
 %}
 
 %shared_ptr(BSplineVarianceSurface);
@@ -1156,6 +1157,17 @@ class BSplineVarianceSurface : public BlackVolTermStructure {
     std::vector<Real> sliceTotalVarianceDerivatives(Size i, Real k) const;
     Real totalVariance(Real k, Time t) const;
     Real localVariance(Real k, Time t) const;
+    Real dividendPV(Time t) const;
+    Real coordinate(Time t, Real strike) const;
+    bool pureDividendCoordinates() const;
+    void setPureDividendCoordinates(bool pure);
+};
+
+%shared_ptr(BSplineLocalVolSurface);
+class BSplineLocalVolSurface : public LocalVolTermStructure {
+  public:
+    explicit BSplineLocalVolSurface(const ext::shared_ptr<BSplineVarianceSurface>& blackSurface);
+    const ext::shared_ptr<BSplineVarianceSurface>& blackSurface() const;
 };
 
 // PWL PDF vol surface (takes raw PDF params, computes black vol analytically)
