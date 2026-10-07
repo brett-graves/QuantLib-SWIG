@@ -1380,7 +1380,9 @@ class FdBlackScholesStripEngine : public PricingEngine {
         Real mesherEps = 0.0001,
         Real spotConcentrationDensity = 0.1,
         Real illegalLocalVolOverwrite = -Null<Real>(),
-        const std::vector<Time>& stoppingTimes = std::vector<Time>());
+        const std::vector<Time>& stoppingTimes = std::vector<Time>(),
+        doubleOrNull coreStdDevs = Null<Real>(),
+        Real coreFraction = 0.5);
 
     //! strip solves run so far
     Size solveCount() const;

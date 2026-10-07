@@ -46,6 +46,7 @@ using QuantLib::FdmHestonLocalVolatilityVarianceMesher;
 using QuantLib::Uniform1dMesher;
 using QuantLib::FdmSimpleProcess1dMesher;
 using QuantLib::Predefined1dMesher;
+using QuantLib::GradedCore1dMesher;
 using QuantLib::Glued1dMesher;
 %}
 
@@ -172,7 +173,14 @@ class FdmBlackScholesStripSolver {
         Size xGrid,
         Real scaleFactor = 2.0,
         Real eps = 0.0001,
-        Real spotDensity = 0.1);
+        Real spotDensity = 0.1,
+        doubleOrNull coreStdDevs = Null<Real>(),
+        Real coreFraction = 0.5);
+
+    static Real atmStdDev(
+        const ext::shared_ptr<GeneralizedBlackScholesProcess>& process,
+        Time maturity,
+        const DividendSchedule& dividends);
 };
 
 %shared_ptr(ExponentialJump1dMesher)
@@ -243,6 +251,14 @@ class Uniform1dMesher : public Fdm1dMesher {
 class Predefined1dMesher : public Fdm1dMesher {
   public:
     explicit Predefined1dMesher(const std::vector<Real>& x);
+};
+
+%shared_ptr(GradedCore1dMesher)
+class GradedCore1dMesher : public Fdm1dMesher {
+  public:
+    GradedCore1dMesher(Real start, Real end, Size size, Real center,
+                       Real coreHalfWidth, Real coreFraction = 0.5);
+    std::pair<Real, Real> growthRatios() const;
 };
 
 %shared_ptr(Glued1dMesher)
