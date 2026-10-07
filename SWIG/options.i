@@ -1382,7 +1382,8 @@ class FdBlackScholesStripEngine : public PricingEngine {
         Real illegalLocalVolOverwrite = -Null<Real>(),
         const std::vector<Time>& stoppingTimes = std::vector<Time>(),
         doubleOrNull coreStdDevs = Null<Real>(),
-        Real coreFraction = 0.5);
+        Real coreFraction = 0.5,
+        Size dampingSteps = 0);
 
     //! strip solves run so far
     Size solveCount() const;

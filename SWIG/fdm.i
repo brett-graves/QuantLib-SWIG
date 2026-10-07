@@ -161,7 +161,8 @@ class FdmBlackScholesStripSolver {
         Size tGrid,
         Real illegalLocalVolOverwrite = -Null<Real>(),
         const std::vector<Time>& stoppingTimes = std::vector<Time>(),
-        bool exactCellAverage = false);
+        bool exactCellAverage = false,
+        Size dampingSteps = 0);
 
     FdmBlackScholesStripResults solve() const;
 
