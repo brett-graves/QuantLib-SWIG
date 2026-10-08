@@ -1167,6 +1167,9 @@ class BSplineVarianceSurface : public BlackVolTermStructure {
 class BSplineLocalVolSurface : public LocalVolTermStructure {
   public:
     explicit BSplineLocalVolSurface(const ext::shared_ptr<BSplineVarianceSurface>& blackSurface);
+    // Sticky strike: local vol of a diffusion started at diffusionSpot.
+    BSplineLocalVolSurface(const ext::shared_ptr<BSplineVarianceSurface>& blackSurface,
+                           const Handle<Quote>& diffusionSpot);
     const ext::shared_ptr<BSplineVarianceSurface>& blackSurface() const;
 };
 
