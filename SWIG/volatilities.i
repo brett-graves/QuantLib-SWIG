@@ -1161,6 +1161,10 @@ class BSplineVarianceSurface : public BlackVolTermStructure {
     Real coordinate(Time t, Real strike) const;
     bool pureDividendCoordinates() const;
     void setPureDividendCoordinates(bool pure);
+    Real dayProgress() const;
+    Time spendTime() const;
+    // Spend the elapsed share of the session closing on sessionClose (chloride #730).
+    void setDayProgress(const Handle<Quote>& progress, const Date& sessionClose);
 };
 
 %shared_ptr(BSplineLocalVolSurface);
