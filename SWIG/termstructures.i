@@ -138,6 +138,33 @@ class RescaledTimeYieldTermStructure : public YieldTermStructure {
     Real factor() const;
 };
 
+// the intraday equity-option clock: time from now (a quote) to each date's close
+
+%{
+#include <ql/termstructures/yield/intradayequityclock.hpp>
+using QuantLib::IntradayActual365Fixed;
+using QuantLib::IntradayYieldTermStructure;
+%}
+
+class IntradayActual365Fixed : public DayCounter {
+  public:
+    IntradayActual365Fixed(const Date& anchor,
+                           const Handle<Quote>& now,
+                           Real close,
+                           const Date& session = Date(),
+                           doubleOrNull sessionClose = Null<Real>());
+};
+
+%shared_ptr(IntradayYieldTermStructure);
+class IntradayYieldTermStructure : public YieldTermStructure {
+  public:
+    IntradayYieldTermStructure(const Handle<YieldTermStructure>& base,
+                               const Date& anchor,
+                               const Handle<Quote>& now,
+                               const DayCounter& clock);
+    Time baseNow() const;
+};
+
 // spreaded term structures
 
 %{
