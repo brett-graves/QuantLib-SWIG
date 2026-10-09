@@ -1170,7 +1170,8 @@ class BSplineVarianceSurface : public BlackVolTermStructure {
                           Time sessionClose,
                           Time fitTime,
                           Real fitProgress,
-                          Real close);
+                          Real close,
+                          const DayCounter& clock);
 };
 
 %shared_ptr(BSplineLocalVolSurface);
