@@ -202,6 +202,18 @@ class VanillaOption : public OneAssetOption {
                          Volatility maxVol = 4.0);
 };
 
+// alive through its expiry date, for the intraday equity-option clock (chloride #730)
+%{
+using QuantLib::IntradayVanillaOption;
+%}
+%shared_ptr(IntradayVanillaOption)
+class IntradayVanillaOption : public VanillaOption {
+  public:
+    IntradayVanillaOption(
+            const ext::shared_ptr<StrikedTypePayoff>& payoff,
+            const ext::shared_ptr<Exercise>& exercise);
+};
+
 %template(CalibrationPair) std::pair< ext::shared_ptr<VanillaOption>, ext::shared_ptr<Quote> >;
 %template(CalibrationSet) std::vector<std::pair< ext::shared_ptr<VanillaOption>, ext::shared_ptr<Quote> > >;
 
