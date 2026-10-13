@@ -1114,6 +1114,48 @@ class PwlPdfBlackVolSurface : public BlackVolTermStructure {
             = std::vector<Real>());
 };
 
+
+// Spline-smile black vol surface: per-expiry natural cubic smiles in
+// log-forward moneyness, Lee-clamped linear total-variance wings, total
+// variance linear in time at fixed k (chloride band spline benchmarks).
+
+%{
+#include <ql/termstructures/volatility/equityfx/splinesmilevolsurface.hpp>
+using QuantLib::SplineSmileVolSurface;
+%}
+
+%shared_ptr(SplineSmileVolSurface);
+class SplineSmileVolSurface : public BlackVolTermStructure {
+  public:
+    SplineSmileVolSurface(
+        const Date& referenceDate,
+        const std::vector<Date>& dates,
+        const std::vector<std::vector<Real>>& kNodes,
+        const std::vector<std::vector<Real>>& volNodes,
+        const Handle<Quote>& spot,
+        const Handle<YieldTermStructure>& riskFreeRate,
+        const Handle<YieldTermStructure>& dividendYield,
+        const DayCounter& dc = Actual365Fixed(),
+        Real maxWingSlope = 2.0);
+
+    SplineSmileVolSurface(
+        const Date& referenceDate,
+        const std::vector<Date>& dates,
+        const std::vector<std::vector<Real>>& kNodes,
+        const std::vector<std::vector<Real>>& volNodes,
+        const Handle<Quote>& spot,
+        const Handle<YieldTermStructure>& riskFreeRate,
+        const Handle<YieldTermStructure>& dividendYield,
+        DividendSchedule dividends,
+        const DayCounter& dc = Actual365Fixed(),
+        Real maxWingSlope = 2.0);
+
+    Real forward(Time t) const;
+    const std::vector<Time>& times() const;
+    Real sliceTotalVariance(Size i, Real k) const;
+    Real totalVariance(Real k, Time t) const;
+};
+
 // B-spline total-variance surface: per-expiry clamped B-splines of w(k) in
 // log-forward moneyness, straight total-variance wings, total variance linear
 // in time at fixed k (chloride Meniscus calibrator output).
