@@ -189,6 +189,7 @@ QL_DEPRECATED_DISABLE_WARNING
 %include callablerangeaccrualswap.i
 %include swingoption.i
 %include termstructures.i
+%include fomcstep.i
 %include timebasket.i
 %include timeseries.i
 %include tracing.i
