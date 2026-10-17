@@ -45,6 +45,10 @@ struct FomcStepCurveConfig {
     Real spreadCurveBp;
     Real curvatureLambda;
     Integer curveYears;
+    Real ultimateForwardBp;
+    Real ultimateSigmaBp;
+    Real tailTensionStartYears;
+    Real tailTensionLambda;
     Integer tailNodeDays;
     Size maxOuterSteps;
     Real nonlinearTolBp;
