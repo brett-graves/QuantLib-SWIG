@@ -109,6 +109,8 @@ class FomcStepFit {
              bool holdSynthetic = false,
              bool reuseJacobian = false);
     void show(const Array& x);
+    void setHalfWidthsBp(const std::vector<Real>& halfWidthsBp);
+    const std::vector<Real>& halfWidthsBp() const;
     const ext::shared_ptr<FomcStepParametrisation>& parametrisation() const;
     ext::shared_ptr<YieldTermStructure> sofrCurve() const;
     ext::shared_ptr<YieldTermStructure> effrCurve() const;
