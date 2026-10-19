@@ -196,6 +196,7 @@ QL_DEPRECATED_DISABLE_WARNING
 %include types.i
 %include varianceswaps.i
 %include volatilities.i
+%include deliveryoption.i
 %include volatilitymodels.i
 %include zerocurve.i
 %include old_volatility.i
