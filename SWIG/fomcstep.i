@@ -50,6 +50,8 @@ struct FomcStepCurveConfig {
     Real tailTensionStartYears;
     Real tailTensionLambda;
     Integer tailNodeDays;
+    std::vector<Date> jumpDates;
+    std::vector<Real> jumpBp;
     Size maxOuterSteps;
     Real nonlinearTolBp;
 };
