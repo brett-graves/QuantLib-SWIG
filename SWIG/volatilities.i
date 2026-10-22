@@ -1178,7 +1178,8 @@ class BSplineVarianceSurface : public BlackVolTermStructure {
         const Handle<Quote>& spot,
         const Handle<YieldTermStructure>& riskFreeRate,
         const Handle<YieldTermStructure>& dividendYield,
-        const DayCounter& dc = Actual365Fixed());
+        const DayCounter& dc = Actual365Fixed(),
+        const std::vector<Time>& pillarOffsets = std::vector<Time>());
 
     BSplineVarianceSurface(
         const Date& referenceDate,
@@ -1190,10 +1191,13 @@ class BSplineVarianceSurface : public BlackVolTermStructure {
         const Handle<YieldTermStructure>& riskFreeRate,
         const Handle<YieldTermStructure>& dividendYield,
         DividendSchedule dividends,
-        const DayCounter& dc = Actual365Fixed());
+        const DayCounter& dc = Actual365Fixed(),
+        const std::vector<Time>& pillarOffsets = std::vector<Time>());
 
     Real forward(Time t) const;
     const std::vector<Time>& times() const;
+    const std::vector<Date>& dates() const;
+    const std::vector<Time>& pillarOffsets() const;
     Natural degree() const;
     Real sliceTotalVariance(Size i, Real k) const;
     std::vector<Real> sliceTotalVarianceDerivatives(Size i, Real k) const;
@@ -1214,6 +1218,20 @@ class BSplineVarianceSurface : public BlackVolTermStructure {
                           Real fitProgress,
                           Real close,
                           const DayCounter& clock);
+};
+
+%{
+#include <ql/termstructures/volatility/equityfx/shiftedtimeblackvol.hpp>
+using QuantLib::ShiftedTimeBlackVol;
+%}
+
+// Black variance of a base surface read `offset` years earlier: an A.M.-settled
+// option (SPX) expiring at the open of its date reads its own pillar.
+%shared_ptr(ShiftedTimeBlackVol);
+class ShiftedTimeBlackVol : public BlackVolTermStructure {
+  public:
+    ShiftedTimeBlackVol(const Handle<BlackVolTermStructure>& base, Time offset);
+    Time offset() const;
 };
 
 %shared_ptr(BSplineLocalVolSurface);
