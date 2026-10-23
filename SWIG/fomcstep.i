@@ -111,6 +111,11 @@ class FomcStepFit {
              bool holdSynthetic = false,
              bool reuseJacobian = false);
     void show(const Array& x);
+    void restore(const Array& x,
+                 const Matrix& jacobian,
+                 const std::string& loss = "band",
+                 bool holdSynthetic = false,
+                 Size outerSteps = 0);
     void setHalfWidthsBp(const std::vector<Real>& halfWidthsBp);
     const std::vector<Real>& halfWidthsBp() const;
     const ext::shared_ptr<FomcStepParametrisation>& parametrisation() const;
