@@ -154,6 +154,17 @@ class BlackVolTermStructure : public VolatilityTermStructure {
     doubleOrNull atmLevel(Time t) const;
 };
 
+%extend Handle<BlackVolTermStructure> {
+    //! blackVariance(d, k, extrapolate) for every strike k, in one call
+    std::vector<Real> blackVarianceSlice(const Date& d, const std::vector<Real>& strikes,
+                                         bool extrapolate = false) const {
+        std::vector<Real> out;
+        out.reserve(strikes.size());
+        for (Real k : strikes)
+            out.push_back((*self)->blackVariance(d, k, extrapolate));
+        return out;
+    }
+}
 %template(BlackVolTermStructureHandle) Handle<BlackVolTermStructure>;
 %template(RelinkableBlackVolTermStructureHandle) RelinkableHandle<BlackVolTermStructure>;
 

@@ -1418,6 +1418,22 @@ class FdBlackScholesStripEngine : public PricingEngine {
             }
             self->declare(maturity, t, strikes, exerciseType);
         }
+        //! value, delta, gamma and theta (one list each) of the given options of
+        //! one expiry, in the order given; see FdBlackScholesStripEngine::results
+        std::vector<std::vector<Real> > declaredResults(const Date& maturity,
+                                                       const std::vector<int>& types,
+                                                       const std::vector<Real>& strikes,
+                                                       Exercise::Type exerciseType = Exercise::American) const {
+            std::vector<Option::Type> t;
+            t.reserve(types.size());
+            for (int x : types) {
+                QL_REQUIRE(x == Option::Call || x == Option::Put,
+                           "option type " << x << " is neither Call nor Put");
+                t.push_back(Option::Type(x));
+            }
+            QuantLib::FdmBlackScholesStripResults r = self->results(maturity, t, strikes, exerciseType);
+            return {r.value, r.delta, r.gamma, r.theta};
+        }
     }
 };
 
