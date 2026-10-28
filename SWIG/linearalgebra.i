@@ -514,6 +514,10 @@ class Matrix {
             out << *self;
             return out.str();
         }
+        // Every entry in row-major order in one call: rows() x columns() values.
+        std::vector<Real> values() const {
+            return std::vector<Real>($self->begin(), $self->end());
+        }
         #if defined(SWIGPYTHON)
         Matrix __add__(const Matrix& m) {
             return *self+m;
